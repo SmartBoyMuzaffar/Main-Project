@@ -194,7 +194,7 @@ def admin():
 @app.route(f'/led', methods=['GET', 'POST'])
 @login_required
 def led():
-
+    light_db = light.query.filter_by(id=1).first()
     cmd = request.args.get('LED')
     led = ''
     value = 'LED_ON'
@@ -204,17 +204,17 @@ def led():
             requests.get(f'http://192.168.0.14/?LED={cmd}')
             # requests.get(f'http://172.20.10.2/?LED={cmd}')
             value = 'LED_OFF'
-            # iot_light = light(cmd='off', light_is=False)
-            # db.session.add(iot_light)
-            # db.session.commit()
+            light_db = light.query.filter_by(id=1).first()
+            light_db.cmd,light_db.light_is = 'on',True
+            db.session.commit()
             return render_template('led.html', led=led, value=value, is_admin=current_user.admin)
         if cmd == 'LED_OFF':
             requests.get(f'http://192.168.0.14/?LED={cmd}')
             # requests.get(f'http://172.20.10.2/?LED={cmd}')
             value = 'LED_ON'
-            # iot_light = light(cmd='on', light=True)
-            # db.session.add(iot_light)
-            # db.session.commit()
+            light_db = light.query.filter_by(id=1).first()
+            light_db.cmd, light_db.light_is = 'off',False
+            db.session.commit()
             return render_template('led.html', led=led, value=value, is_admin=current_user.admin)
     return render_template('led.html', led=led, value=value, is_admin=current_user.admin)
 
