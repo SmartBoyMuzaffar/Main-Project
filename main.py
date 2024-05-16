@@ -4,21 +4,20 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, log
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
-from flask_bcrypt import Bcrypt
+# from flask_bcrypt import Bcrypt
 import requests
 
 app = Flask(__name__)
 
 secret_key = 'cdd303f0-d70a-4e36-a9f7-f94a14b59942'
 db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
+# bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
 app.config['SECRET_KEY'] = secret_key
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -77,15 +76,12 @@ def _():
 def user():
     return redirect(url_for('profile'))
 
-
 ########################################################################################################################
 
 @app.route(f'/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-
     return render_template("dashboard.html", is_admin=current_user.admin)
-
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -104,7 +100,8 @@ def login():
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
             if user:
-                if bcrypt.check_password_hash(user.password, form.password.data):
+                # if bcrypt.check_password_hash(user.password, form.password.data):
+                if user.password == form.password.data:
                     flash('You were successfully logged in!')
                     login_user(user)
                     return redirect(url_for('dashboard'))
@@ -149,8 +146,8 @@ def admin():
                             else:
                                 admin = False
 
-                            hashed_password = bcrypt.generate_password_hash(password)
-                            new_user = User(username=username, password=hashed_password, admin=admin)
+                            # hashed_password = bcrypt.generate_password_hash(password)
+                            new_user = User(username=username, password=password, admin=admin)
                             db.session.add(new_user)
                             db.session.commit()
                             flash('User registered successfully!!!')
@@ -163,7 +160,8 @@ def admin():
                     if username and password:
                         user = User.query.filter_by(username=username).first()
                         if user:
-                            user.password = bcrypt.generate_password_hash(password)
+                            # user.password = bcrypt.generate_password_hash(password)
+                            user.password = password
                             db.session.commit()
                             flash('User updated successfully!!!')
                             return redirect(url_for('admin'))
@@ -195,28 +193,34 @@ def admin():
 @login_required
 def led():
     light_db = light.query.filter_by(id=1).first()
-    cmd = request.args.get('LED')
+    # cmd = request.args.get('LED')
     led = ''
-    value = 'LED_ON'
-    if cmd != None:
-        led = cmd[4:]
-        if cmd == 'LED_ON':
-            requests.get(f'http://192.168.0.14/?LED={cmd}')
-            # requests.get(f'http://172.20.10.2/?LED={cmd}')
-            value = 'LED_OFF'
-            light_db = light.query.filter_by(id=1).first()
-            light_db.cmd,light_db.light_is = 'on',True
+    on,off = 'LED_ON','LED_OFF'
+    # value = 'LED_ON'
+
+    # if cmd != None:
+    if request.method == 'POST':
+        # led = cmd[4:]
+        # if cmd == 'LED_ON':
+
+        if light_db.light_is:
+            # requests.get(f'http://192.168.0.14/?LED={off}')
+            requests.get(f'http://172.20.10.2/?LED={off}')
+            # value = 'LED_OFF'
+            led = 'OFF'
+            light_db.cmd,light_db.light_is = 'off',False
             db.session.commit()
-            return render_template('led.html', led=led, value=value, is_admin=current_user.admin)
-        if cmd == 'LED_OFF':
-            requests.get(f'http://192.168.0.14/?LED={cmd}')
-            # requests.get(f'http://172.20.10.2/?LED={cmd}')
-            value = 'LED_ON'
-            light_db = light.query.filter_by(id=1).first()
-            light_db.cmd, light_db.light_is = 'off',False
+            return render_template('led.html', led=led, db=light_db, is_admin=current_user.admin)
+        # if cmd == 'LED_OFF':
+        else:
+            # requests.get(f'http://192.168.0.14/?LED={on}')
+            requests.get(f'http://172.20.10.2/?LED={on}')
+            # value = 'LED_ON'
+            led = 'ON'
+            light_db.cmd, light_db.light_is = 'on',True
             db.session.commit()
-            return render_template('led.html', led=led, value=value, is_admin=current_user.admin)
-    return render_template('led.html', led=led, value=value, is_admin=current_user.admin)
+            return render_template('led.html', led=led, db=light_db, is_admin=current_user.admin)
+    return render_template('led.html', led=led, db=light_db, is_admin=current_user.admin)
 
 @app.route(f'/profile')
 @login_required
@@ -228,8 +232,8 @@ def profile():
     })
 
 def admin_db():
-    hashed_password = bcrypt.generate_password_hash("smartboy123#")
-    new_user = User(username="smartboy", password=hashed_password, admin=True)
+    # hashed_password = bcrypt.generate_password_hash("smartboy123#")
+    new_user = User(username="smartboy", password="smartboy123#", admin=True)
     db.session.add(new_user)
     db.session.commit()
 

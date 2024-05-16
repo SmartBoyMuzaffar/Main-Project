@@ -68,21 +68,21 @@
 <h1>LED CONTROLLER</h1>
 
 <br><br>
-<form>
+<form method="post" action="{{ url_for('led') }}">
 <div class="onoffswitch">
-{% if value == 'LED_OFF' %}
+{% if db.light_is %}
 <style>
     .onoffswitch-checkbox + .onoffswitch-label .onoffswitch-inner {margin-left: 0;}
     .onoffswitch-checkbox + .onoffswitch-label .onoffswitch-switch {right: 0px;}
 </style>
-<button name="LED" value="{{ value }}" type="submit" class="onoffswitch-checkbox" id="myonoffswitch">LED ON</button>
+<button type="submit" class="onoffswitch-checkbox" id="myonoffswitch">LED ON</button>
     <label class="onoffswitch-label" for="myonoffswitch">
         <span class="onoffswitch-inner"></span>
         <span class="onoffswitch-switch"></span>
     </label>
 
 {% else %}
-<button name="LED" value="{{ value }}" type="submit" class="onoffswitch-checkbox" id="myonoffswitch">LED OFF</button>
+    <button type="submit" class="onoffswitch-checkbox" id="myonoffswitch">LED OFF</button>
     <label class="onoffswitch-label" for="myonoffswitch">
         <span class="onoffswitch-inner"></span>
         <span class="onoffswitch-switch"></span>
