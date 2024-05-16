@@ -189,38 +189,6 @@ def admin():
 
 ########################################################################################################################
 
-@app.route(f'/led', methods=['GET', 'POST'])
-@login_required
-def led():
-    light_db = light.query.filter_by(id=1).first()
-    # cmd = request.args.get('LED')
-    led = ''
-    on,off = 'LED_ON','LED_OFF'
-    # value = 'LED_ON'
-
-    # if cmd != None:
-    if request.method == 'POST':
-        # led = cmd[4:]
-        # if cmd == 'LED_ON':
-
-        if light_db.light_is:
-            # requests.get(f'http://192.168.0.14/?LED={off}')
-            requests.get(f'http://172.20.10.2/?LED={off}')
-            # value = 'LED_OFF'
-            led = 'OFF'
-            light_db.cmd,light_db.light_is = 'off',False
-            db.session.commit()
-            return render_template('led.html', led=led, db=light_db, is_admin=current_user.admin)
-        # if cmd == 'LED_OFF':
-        else:
-            # requests.get(f'http://192.168.0.14/?LED={on}')
-            requests.get(f'http://172.20.10.2/?LED={on}')
-            # value = 'LED_ON'
-            led = 'ON'
-            light_db.cmd, light_db.light_is = 'on',True
-            db.session.commit()
-            return render_template('led.html', led=led, db=light_db, is_admin=current_user.admin)
-    return render_template('led.html', led=led, db=light_db, is_admin=current_user.admin)
 
 @app.route(f'/profile')
 @login_required
