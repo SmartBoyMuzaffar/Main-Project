@@ -6,6 +6,9 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_bcrypt import Bcrypt
 import requests
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 ########################################################################################################################
 # ...
@@ -15,7 +18,8 @@ app = Flask(__name__)
 secret_key = 'cdd303f0-d70a-4e36-a9f7-f94a14b59942'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgresql:oW0Al1JPI03FikwBTkAQcX4d5STstWy0@dpg-cnlujkol5elc73cb0e20-a.oregon-postgres.render.com/pgdb_y28n'
+app.config[
+    'SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgresql:oW0Al1JPI03FikwBTkAQcX4d5STstWy0@dpg-cnlujkol5elc73cb0e20-a.oregon-postgres.render.com/pgdb_y28n'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = secret_key
 
@@ -23,44 +27,60 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 @app.errorhandler(404)
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
     return render_template("404.html")
+
+
 ########################################################################################################################
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(10), nullable=False)
     password = db.Column(db.String(150), nullable=False)
     admin = db.Column(db.Boolean(10), nullable=False)
+
+
 class automation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     light = db.Column(db.Boolean(10), nullable=False)
     door = db.Column(db.Boolean(10), nullable=False)
     motion = db.Column(db.Boolean(10), nullable=False)
     temperature = db.Column(db.Boolean(10), nullable=False)
+
+
 ########################################################################################################################
 class light(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cmd = db.Column(db.String(10), nullable=False)
     light_is = db.Column(db.Boolean(10), nullable=False)
+
+
 class door(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cmd = db.Column(db.String(10), nullable=False)
     door_is = db.Column(db.Boolean(10), nullable=False)
+
+
 class motion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cmd = db.Column(db.String(10), nullable=False)
     motion_is = db.Column(db.Boolean(10), nullable=False)
+
+
 class temperature(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cmd = db.Column(db.String(10), nullable=False)
     temperature_is = db.Column(db.Boolean(10), nullable=False)
+
+
 ########################################################################################################################
 class LoginForm(FlaskForm):
     username = StringField(validators=[
@@ -69,16 +89,19 @@ class LoginForm(FlaskForm):
         InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
     submit = SubmitField('Login')
 
+
 ########################################################################################################################
 @app.route('/')
 @login_required
 def _():
     return redirect(url_for('dashboard'))
 
+
 @app.route(f'/user')
 @login_required
 def user():
     return redirect(url_for('profile'))
+
 
 ########################################################################################################################
 
@@ -86,6 +109,7 @@ def user():
 @login_required
 def dashboard():
     return render_template("dashboard.html", is_admin=current_user.admin)
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -102,17 +126,23 @@ def login():
     else:
         form = LoginForm()
         if form.validate_on_submit():
-            user = User.query.filter_by(username=form.username.data).first()
+            username = request.form['username']
+            password = request.form['password']
+            user = User.query.filter_by(username=username).first()
+            # user = User.query.filter_by(username=form.username.data).first()
             if user:
-                if bcrypt.check_password_hash(user.password, form.password.data):
+                logging.debug(f"Retrieved password hash from database: {user.password}")
+
                 # if user.password == form.password.data:
+                # if user and bcrypt.check_password_hash(user.password, form.password.data):
+                if bcrypt.check_password_hash(user.password, password):
                     flash('You were successfully logged in!')
                     login_user(user)
                     return redirect(url_for('dashboard'))
                 else:
                     flash("Password is incorrect!!!", "error")
             else:
-                flash("User does not exists!!!",  "error")
+                flash("User does not exists!!!", "error")
         return render_template('login.html', form=form)
 
 
@@ -121,75 +151,77 @@ def username_exists(username):
     # Query the User table to check if the username exists
     user = User.query.filter_by(username=username).first()
     return user is not None
+
+
 @app.route(f'/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-
     if current_user.admin:
 
-            user_db = User.query.all()
+        user_db = User.query.all()
 
-            if request.method == 'POST':
+        if request.method == 'POST':
 
-                query = request.form['query']
-                username = request.form['username']
-                password = request.form['password']
+            query = request.form['query']
+            username = request.form['username']
+            password = request.form['password']
 
-                if " " in username or " " in password:
-                    flash("Username or Password must not consists from spaces.")
+            if " " in username or " " in password:
+                flash("Username or Password must not consists from spaces.")
+                return redirect(url_for('admin'))
+
+            if query == 'Register':
+                if username_exists(username):
+                    flash("Username exists in the database!!!.")
                     return redirect(url_for('admin'))
+                else:
+                    if username and password:
+                        if username in ['admin', 'smartboy']:
+                            admin = True
+                        else:
+                            admin = False
 
-                if query == 'Register':
-                    if username_exists(username):
-                        flash("Username exists in the database!!!.")
+                        hashed_password = bcrypt.generate_password_hash(password)
+                        new_user = User(username=username, password=hashed_password, admin=admin)
+                        db.session.add(new_user)
+                        db.session.commit()
+                        flash('User registered successfully!!!')
                         return redirect(url_for('admin'))
                     else:
-                        if username and password:
-                            if username in ['admin', 'smartboy']:
-                                admin = True
-                            else:
-                                admin = False
-
-                            hashed_password = bcrypt.generate_password_hash(password)
-                            new_user = User(username=username, password=hashed_password, admin=admin)
-                            db.session.add(new_user)
-                            db.session.commit()
-                            flash('User registered successfully!!!')
-                            return redirect(url_for('admin'))
-                        else:
-                            flash("Please, make sure Username or Password entered correctly!!!")
-                            return redirect(url_for("admin"))
-
-                if query == 'Update':
-                    if username and password:
-                        user = User.query.filter_by(username=username).first()
-                        if user:
-                            user.password = bcrypt.generate_password_hash(password)
-                            # user.password = password
-                            db.session.commit()
-                            flash('User updated successfully!!!')
-                            return redirect(url_for('admin'))
-                        else:
-                            flash('User not found!!!')
-                            return redirect(url_for('admin'))
-                    else:
-                        flash("Please, Make Sure Username or Password Entered Correctly!!!")
+                        flash("Please, make sure Username or Password entered correctly!!!")
                         return redirect(url_for("admin"))
 
-                if query == 'Delete':
+            if query == 'Update':
+                if username and password:
                     user = User.query.filter_by(username=username).first()
                     if user:
-                        db.session.delete(user)
+                        user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+                        # user.password = password
                         db.session.commit()
-                        flash('User successfully removed!!!')
+                        flash('User updated successfully!!!')
                         return redirect(url_for('admin'))
                     else:
-                        flash('User not found or already removed!!!')
+                        flash('User not found!!!')
                         return redirect(url_for('admin'))
+                else:
+                    flash("Please, Make Sure Username or Password Entered Correctly!!!")
+                    return redirect(url_for("admin"))
 
-            return render_template('admin.html', users=user_db)
+            if query == 'Delete':
+                user = User.query.filter_by(username=username).first()
+                if user:
+                    db.session.delete(user)
+                    db.session.commit()
+                    flash('User successfully removed!!!')
+                    return redirect(url_for('admin'))
+                else:
+                    flash('User not found or already removed!!!')
+                    return redirect(url_for('admin'))
+
+        return render_template('admin.html', users=user_db)
     else:
         return redirect(url_for('dashboard'))
+
 
 ########################################################################################################################
 
@@ -203,8 +235,9 @@ def profile():
         "password": None
     })
 
+
 def admin_db():
-    hashed_password = bcrypt.generate_password_hash("smartboy123#")
+    hashed_password = bcrypt.generate_password_hash("smartboy123#").decode("utf-8")
     new_user = User(username="smartboy", password=hashed_password, admin=True)
     db.session.add(new_user)
     db.session.commit()
@@ -213,5 +246,5 @@ def admin_db():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    # admin_db()
+    admin_db()
     app.run(host="0.0.0.0")
