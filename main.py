@@ -1,18 +1,21 @@
-from flask import Flask, render_template, url_for, redirect, request, jsonify, flash
+from flask import *
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
-# from flask_bcrypt import Bcrypt
+from flask_bcrypt import Bcrypt
 import requests
 
+########################################################################################################################
+
+########################################################################################################################
 app = Flask(__name__)
 
 secret_key = 'cdd303f0-d70a-4e36-a9f7-f94a14b59942'
 db = SQLAlchemy(app)
-# bcrypt = Bcrypt(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
+bcrypt = Bcrypt(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = ''
 app.config['SECRET_KEY'] = secret_key
 
 login_manager = LoginManager()
@@ -100,8 +103,8 @@ def login():
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
             if user:
-                # if bcrypt.check_password_hash(user.password, form.password.data):
-                if user.password == form.password.data:
+                if bcrypt.check_password_hash(user.password, form.password.data):
+                # if user.password == form.password.data:
                     flash('You were successfully logged in!')
                     login_user(user)
                     return redirect(url_for('dashboard'))
@@ -200,7 +203,7 @@ def profile():
     })
 
 def admin_db():
-    # hashed_password = bcrypt.generate_password_hash("smartboy123#")
+    # hashed_password = bcrypt.generate_password_hash("smartboy00#")
     new_user = User(username="smartboy", password="smartboy123#", admin=True)
     db.session.add(new_user)
     db.session.commit()
