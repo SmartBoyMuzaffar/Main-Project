@@ -35,8 +35,8 @@ def not_found(e):
 ########################################################################################################################
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False)
-    password = db.Column(db.String(80), nullable=False)
+    username = db.Column(db.String(10), nullable=False)
+    password = db.Column(db.String(150), nullable=False)
     admin = db.Column(db.Boolean(10), nullable=False)
 class automation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -204,7 +204,7 @@ def profile():
     })
 
 def admin_db():
-    hashed_password = bcrypt.generate_password_hash("smartboy00#")
+    hashed_password = bcrypt.generate_password_hash("smartboy123#")
     new_user = User(username="smartboy", password=hashed_password, admin=True)
     db.session.add(new_user)
     db.session.commit()
