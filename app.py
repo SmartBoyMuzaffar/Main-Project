@@ -241,14 +241,16 @@ def data():
 
 ########################################################################################################################
 def admin_db():
-    hashed_password = bcrypt.generate_password_hash("smartboy123#").decode("utf-8")
-    new_user = User(username="smartboy", password=hashed_password, admin=True)
-    db.session.add(new_user)
-    db.session.commit()
+    hashed_password = bcrypt.generate_password_hash("password123#").decode("utf-8")
+    user = User.query.filter_by(username="smartboy").first()
+    if not user:
+        new_user = User(username="smartboy", password=hashed_password, admin=True)
+        db.session.add(new_user)
+        db.session.commit()
 
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    # admin_db()
+    admin_db()
     app.run(host="0.0.0.0")
