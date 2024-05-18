@@ -8,14 +8,14 @@ from flask_bcrypt import Bcrypt
 import requests
 
 ########################################################################################################################
-# .....
+# ...
 ########################################################################################################################
 app = Flask(__name__)
 
 secret_key = 'cdd303f0-d70a-4e36-a9f7-f94a14b59942'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = ''
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgresql:oW0Al1JPI03FikwBTkAQcX4d5STstWy0@dpg-cnlujkol5elc73cb0e20-a.oregon-postgres.render.com/pgdb_y28n'
 app.config['SECRET_KEY'] = secret_key
 
 login_manager = LoginManager()
