@@ -150,8 +150,8 @@ def admin():
                             else:
                                 admin = False
 
-                            # hashed_password = bcrypt.generate_password_hash(password)
-                            new_user = User(username=username, password=password, admin=admin)
+                            hashed_password = bcrypt.generate_password_hash(password)
+                            new_user = User(username=username, password=hashed_password, admin=admin)
                             db.session.add(new_user)
                             db.session.commit()
                             flash('User registered successfully!!!')
@@ -164,8 +164,8 @@ def admin():
                     if username and password:
                         user = User.query.filter_by(username=username).first()
                         if user:
-                            # user.password = bcrypt.generate_password_hash(password)
-                            user.password = password
+                            user.password = bcrypt.generate_password_hash(password)
+                            # user.password = password
                             db.session.commit()
                             flash('User updated successfully!!!')
                             return redirect(url_for('admin'))
@@ -204,8 +204,8 @@ def profile():
     })
 
 def admin_db():
-    # hashed_password = bcrypt.generate_password_hash("smartboy00#")
-    new_user = User(username="smartboy", password="smartboy123#", admin=True)
+    hashed_password = bcrypt.generate_password_hash("smartboy00#")
+    new_user = User(username="smartboy", password=hashed_password, admin=True)
     db.session.add(new_user)
     db.session.commit()
 
