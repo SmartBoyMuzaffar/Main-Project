@@ -7,6 +7,9 @@ from wtforms.validators import InputRequired, Length
 from flask_bcrypt import Bcrypt
 import requests
 import logging
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from markupsafe import Markup
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -48,39 +51,22 @@ class User(db.Model, UserMixin):
     admin = db.Column(db.Boolean(10), nullable=False)
 
 
-class automation(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    light = db.Column(db.Boolean(10), nullable=False)
-    door = db.Column(db.Boolean(10), nullable=False)
-    motion = db.Column(db.Boolean(10), nullable=False)
-    temperature = db.Column(db.Boolean(10), nullable=False)
-
 
 ########################################################################################################################
-class light(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    cmd = db.Column(db.String(10), nullable=False)
-    light_is = db.Column(db.Boolean(10), nullable=False)
+# db.models
+class ip_address(db.Model):
+    s_id = db.Column(db.String, primary_key=True)
+    s_ip = db.Column(db.String(10), nullable=False)
+    s_password = db.Column(db.String(150), nullable=False)
 
-
-class door(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    cmd = db.Column(db.String(10), nullable=False)
-    door_is = db.Column(db.Boolean(10), nullable=False)
-
-
-class motion(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    cmd = db.Column(db.String(10), nullable=False)
-    motion_is = db.Column(db.Boolean(10), nullable=False)
-
-
-class temperature(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    cmd = db.Column(db.String(10), nullable=False)
-    temperature_is = db.Column(db.Boolean(10), nullable=False)
-
-
+# sensors:
+    # 1. light
+    # 2. door
+    # 3. heat
+    # 4. motion
+    # 5. temperature
+    # 6. automation
+    # 7. ..........
 ########################################################################################################################
 class LoginForm(FlaskForm):
     username = StringField(validators=[
@@ -94,7 +80,7 @@ class LoginForm(FlaskForm):
 @app.route('/')
 @login_required
 def _():
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('home'))
 
 
 @app.route(f'/user')
@@ -105,10 +91,10 @@ def user():
 
 ########################################################################################################################
 
-@app.route(f'/dashboard', methods=['GET', 'POST'])
+@app.route(f'/home', methods=['GET', 'POST'])
 @login_required
-def dashboard():
-    return render_template("dashboard.html", is_admin=current_user.admin)
+def home():
+    return render_template("home.html", is_admin=current_user.admin)
 
 
 @app.route('/logout', methods=['GET', 'POST'])
@@ -122,7 +108,7 @@ def logout():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('home'))
     else:
         form = LoginForm()
         if form.validate_on_submit():
@@ -138,7 +124,7 @@ def login():
                 if bcrypt.check_password_hash(user.password, password):
                     flash('You were successfully logged in!')
                     login_user(user)
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('home'))
                 else:
                     flash("Password is incorrect!!!", "error")
             else:
@@ -220,7 +206,7 @@ def admin():
 
         return render_template('admin.html', users=user_db)
     else:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('home'))
 
 
 ########################################################################################################################
@@ -235,7 +221,25 @@ def profile():
         "password": None
     })
 
+########################################################################################################################
 
+@app.route('/data', methods=['GET', 'POST'])
+def data():
+    if request.method == 'POST':
+        data = request.json
+        s_id = data['s_id']
+        s_ip = data['s_ip']
+        s_password = data['s_password']
+
+        new_ip = ip_address(s_id=s_id, s_password=s_password, s_ip=s_ip)
+        db.session.add(new_ip)
+        db.session.commit()
+        return jsonify({"status": "success"}), 201
+    else:
+        return redirect(url_for('_'))
+
+
+########################################################################################################################
 def admin_db():
     hashed_password = bcrypt.generate_password_hash("smartboy123#").decode("utf-8")
     new_user = User(username="smartboy", password=hashed_password, admin=True)
@@ -246,5 +250,5 @@ def admin_db():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    admin_db()
+    # admin_db()
     app.run(host="0.0.0.0")
