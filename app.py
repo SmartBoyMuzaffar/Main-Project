@@ -46,7 +46,7 @@ def not_found(e):
 ########################################################################################################################
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(10), nullable=False)
+    username = db.Column(db.String(30), nullable=False)
     password = db.Column(db.String(150), nullable=False)
     admin = db.Column(db.Boolean(10), nullable=False)
 
@@ -55,8 +55,8 @@ class User(db.Model, UserMixin):
 ########################################################################################################################
 # db.models
 class ip_address(db.Model):
-    s_id = db.Column(db.String, primary_key=True)
-    s_ip = db.Column(db.String(10), nullable=False)
+    s_id = db.Column(db.String(30), primary_key=True)
+    s_ip = db.Column(db.String(30), nullable=False)
     s_password = db.Column(db.String(150), nullable=False)
 
 # sensors:
@@ -225,15 +225,18 @@ def profile():
 
 @app.route('/data', methods=['GET', 'POST'])
 def data():
+
     if request.method == 'POST':
         data = request.json
         s_id = data['s_id']
         s_ip = data['s_ip']
         s_password = data['s_password']
 
-        new_ip = ip_address(s_id=s_id, s_password=s_password, s_ip=s_ip)
-        db.session.add(new_ip)
-        db.session.commit()
+        ip = ip_address.query.filter_by(s_id=s_id).first()
+        if not ip:
+            new_ip = ip_address(s_id=s_id, s_password=s_password, s_ip=s_ip)
+            db.session.add(new_ip)
+            db.session.commit()
         return jsonify({"status": "success"}), 201
     else:
         return redirect(url_for('_'))
