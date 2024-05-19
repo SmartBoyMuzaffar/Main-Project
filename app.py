@@ -167,7 +167,7 @@ def admin():
                         else:
                             admin = False
 
-                        hashed_password = bcrypt.generate_password_hash(password)
+                        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
                         new_user = User(username=username, password=hashed_password, admin=admin)
                         db.session.add(new_user)
                         db.session.commit()
