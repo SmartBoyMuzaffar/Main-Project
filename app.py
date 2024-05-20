@@ -5,11 +5,12 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_bcrypt import Bcrypt
-import requests
+# import requests
 import logging
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from markupsafe import Markup
+# import psycopg2
+# from psycopg2.extras import RealDictCursor
+
+from asgiref.wsgi import WsgiToAsgi
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -251,6 +252,7 @@ def admin_db():
         db.session.add(new_user)
         db.session.commit()
 
+asgi_app = WsgiToAsgi(app)
 
 if __name__ == '__main__':
     with app.app_context():
