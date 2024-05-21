@@ -11,8 +11,8 @@ import logging
 # from psycopg2.extras import RealDictCursor
 ########################################################################################################################
 from asgiref.wsgi import WsgiToAsgi
-from flask_socketio import SocketIO as soketio
-
+from flask_socketio import SocketIO
+soketio = SocketIO(cors_allowed_origins="*")
 ########################################################################################################################
 logging.basicConfig(level=logging.DEBUG)
 
