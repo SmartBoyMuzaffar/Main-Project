@@ -1,3 +1,4 @@
+import os
 from flask import *
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
@@ -13,7 +14,7 @@ import logging
 from asgiref.wsgi import WsgiToAsgi
 
 logging.basicConfig(level=logging.DEBUG)
-
+uvicorn_ws_enabled = os.getenv('UVICORN_WS', 'on') == 'on'
 ########################################################################################################################
 # ...
 ########################################################################################################################
