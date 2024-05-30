@@ -56,9 +56,16 @@ class User(db.Model, UserMixin):
 
 ########################################################################################################################
 # db.models
-class ip_address(db.Model):
-    s_id = db.Column(db.String(30), primary_key=True)
-    s_ip = db.Column(db.String(30), nullable=False)
+class light(db.Model):
+    s_id = db.Column(db.Integer, primary_key=True)
+    s_ip = db.Column(db.String(30), nullable=True)
+    s_status = db.Column(db.String(10), nullable=True)
+
+class temperature(db.Model):
+    s_id = db.Column(db.Integer, primary_key=True)
+    s_ip = db.Column(db.String(30), nullable=True)
+    s_temperature = db.Column(db.String(10), nullable=True)
+    s_humidity = db.Column(db.String(10), nullable=True)
 
 # sensors:
     # 1. light
@@ -224,24 +231,51 @@ def profile():
 
 ########################################################################################################################
 
-@app.route('/data', methods=['GET', 'POST'])
+@app.route('/light', methods=['GET', 'POST'])
 def data():
-
     if request.method == 'POST':
         data = request.json
         s_id = data['s_id']
         s_ip = data['s_ip']
+        s_status = data['s_status']
 
-        id = ip_address.query.filter_by(s_id=s_id).first()
-        if id:
-            id.s_ip = s_ip
-            db.session.commit()
-        if not id:
+        s_id = light.query.filter_by(s_id=s_id).first()
+        if s_id:
+            if s_ip:
+                s_id.s_ip = s_ip
+                db.session.commit()
+            else:
+                s_id.s_status = s_status
+                db.session.commit()
+        if not s_id:
             pass
         return jsonify({"status": "success"}), 201
     else:
         return redirect(url_for('_'))
 
+@app.route('/temperature', methods=['GET', 'POST'])
+def data():
+    if request.method == 'POST':
+        data = request.json
+        s_id = data['s_id']
+        s_ip = data['s_ip']
+        s_temperature = data['s_temperature']
+        s_humidity = data['s_humidity']
+
+        s_id = temperature.query.filter_by(s_id=s_id).first()
+        if s_id:
+            if s_ip:
+                s_id.s_ip = s_ip
+                db.session.commit()
+            else:
+                s_id.s_temperature = s_temperature
+                s_id.s_humidity = s_humidity
+                db.session.commit()
+        if not s_id:
+            pass
+        return jsonify({"status": "success"}), 201
+    else:
+        return redirect(url_for('_'))
 
 ########################################################################################################################
 def admin_db():
