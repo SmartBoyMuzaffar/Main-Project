@@ -232,11 +232,12 @@ def data():
         s_id = data['s_id']
         s_ip = data['s_ip']
 
-        ip = ip_address.query.filter_by(s_id=s_id).first()
-        if not ip:
-            new_ip = ip_address(s_id=s_id, s_ip=s_ip)
-            db.session.add(new_ip)
+        id = ip_address.query.filter_by(s_id=s_id).first()
+        if id:
+            id.s_ip = s_ip
             db.session.commit()
+        if not id:
+            pass
         return jsonify({"status": "success"}), 201
     else:
         return redirect(url_for('_'))
