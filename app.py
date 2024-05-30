@@ -59,7 +59,6 @@ class User(db.Model, UserMixin):
 class ip_address(db.Model):
     s_id = db.Column(db.String(30), primary_key=True)
     s_ip = db.Column(db.String(30), nullable=False)
-    s_password = db.Column(db.String(150), nullable=False)
 
 # sensors:
     # 1. light
@@ -232,11 +231,10 @@ def data():
         data = request.json
         s_id = data['s_id']
         s_ip = data['s_ip']
-        s_password = data['s_password']
 
         ip = ip_address.query.filter_by(s_id=s_id).first()
         if not ip:
-            new_ip = ip_address(s_id=s_id, s_password=s_password, s_ip=s_ip)
+            new_ip = ip_address(s_id=s_id, s_ip=s_ip)
             db.session.add(new_ip)
             db.session.commit()
         return jsonify({"status": "success"}), 201
