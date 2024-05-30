@@ -232,7 +232,7 @@ def profile():
 ########################################################################################################################
 
 @app.route('/light', methods=['GET', 'POST'])
-def data():
+def light():
     if request.method == 'POST':
         data = request.json
         s_id = data['s_id']
@@ -254,7 +254,7 @@ def data():
         return redirect(url_for('_'))
 
 @app.route('/temperature', methods=['GET', 'POST'])
-def data():
+def temperature():
     if request.method == 'POST':
         data = request.json
         s_id = data['s_id']
@@ -295,8 +295,8 @@ class CustomConfig(Config):
 asgi_app = WsgiToAsgi(app)
 ########################################################################################################################
 
-# if __name__ == '__main__':
-#     with app.app_context():
-#         db.create_all()
-#     admin_db()
-#     app.run(host="0.0.0.0")
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    admin_db()
+    app.run(host="0.0.0.0")
