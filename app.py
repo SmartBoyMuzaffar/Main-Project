@@ -188,8 +188,8 @@ def temperature():
         s_humidity = data.get('s_humidity')
         temp_entry = Temperature.query.filter_by(s_id=s_id).first()
         if temp_entry:
-            if s_ip:
-                temp_entry.s_ip = s_ip
+            # if s_ip:
+            #     temp_entry.s_ip = s_ip
             if s_temperature and s_humidity:
                 temp_entry.s_temperature = s_temperature
                 temp_entry.s_humidity = s_humidity
