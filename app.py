@@ -208,11 +208,6 @@ def admin_db():
         db.session.add(new_user)
         db.session.commit()
 
-from uvicorn.config import Config
-
-class CustomConfig(Config):
-    ws = False
-
 asgi_app = WsgiToAsgi(app)
 
 if __name__ == '__main__':
