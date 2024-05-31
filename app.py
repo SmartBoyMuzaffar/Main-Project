@@ -7,7 +7,6 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_bcrypt import Bcrypt
 import logging
-from asgiref.wsgi import WsgiToAsgi
 
 logging.basicConfig(level=logging.DEBUG)
 uvicorn_ws_enabled = os.getenv('UVICORN_WS', 'on') == 'on'
@@ -207,8 +206,6 @@ def admin_db():
         new_user = User(username="smartboy", password=hashed_password, admin=True)
         db.session.add(new_user)
         db.session.commit()
-
-asgi_app = WsgiToAsgi(app)
 
 if __name__ == '__main__':
     with app.app_context():
