@@ -183,14 +183,15 @@ def temperature():
     if request.method == 'POST':
         data = request.json
         s_id = data.get('s_id')
-        s_ip = data.get('s_ip')
-        s_temperature = data.get('s_temperature')
-        s_humidity = data.get('s_humidity')
+
         temp_entry = Temperature.query.filter_by(s_id=s_id).first()
         if temp_entry:
-            if s_ip:
+            if data.get('s_ip'):
+                s_ip = data.get('s_ip')
                 temp_entry.s_ip = s_ip
-            if s_temperature and s_humidity:
+            if data.get('s_temperature') and data.get('s_humidity'):
+                s_temperature = data.get('s_temperature')
+                s_humidity = data.get('s_humidity')
                 temp_entry.s_temperature = s_temperature
                 temp_entry.s_humidity = s_humidity
             db.session.commit()
