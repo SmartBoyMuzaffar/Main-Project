@@ -9,7 +9,7 @@ from flask_bcrypt import Bcrypt
 import logging
 from asgiref.wsgi import WsgiToAsgi
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 uvicorn_ws_enabled = os.getenv('UVICORN_WS', 'on') == 'on'
 
 app = Flask(__name__)
