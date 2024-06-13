@@ -208,10 +208,10 @@ def admin_db():
         db.session.add(new_user)
         db.session.commit()
 
-# asgi_app = WsgiToAsgi(app)
+asgi_app = WsgiToAsgi(app)
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    # admin_db()
-    app.run(ssl_context=('/etc/letsencrypt/live/kafolat.life/fullchain.pem', '/etc/letsencrypt/live/kafolat.life/privkey.pem'))
+# if __name__ == '__main__':
+#     with app.app_context():
+#         db.create_all()
+#     # admin_db()
+#     app.run(ssl_context=('/etc/letsencrypt/live/kafolat.life/fullchain.pem', '/etc/letsencrypt/live/kafolat.life/privkey.pem'))
