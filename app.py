@@ -214,4 +214,4 @@ asgi_app = WsgiToAsgi(app)
 #     with app.app_context():
 #         db.create_all()
 #     # admin_db()
-#     app.run(host="0.0.0.0", port=443)
+#     app.run(host="0.0.0.0", port=8000)
