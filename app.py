@@ -215,3 +215,4 @@ if __name__ == '__main__':
         db.create_all()
     # admin_db()
     app.run(host="0.0.0.0", port=443)
+
