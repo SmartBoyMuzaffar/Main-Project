@@ -95,7 +95,7 @@ def login():
             else:
                 flash("Password is incorrect!!!", "error")
         else:
-            flash("User does not exist!!!", "error")
+            flash("User does not exists!!!", "error")
     return render_template('login.html', form=form)
 
 def username_exists(username):
@@ -214,4 +214,4 @@ asgi_app = WsgiToAsgi(app)
 #     with app.app_context():
 #         db.create_all()
 #     # admin_db()
-#     app.run(ssl_context=('/etc/letsencrypt/live/kafolat.life/fullchain.pem', '/etc/letsencrypt/live/kafolat.life/privkey.pem'))
+#     app.run()
