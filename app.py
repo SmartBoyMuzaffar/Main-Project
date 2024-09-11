@@ -158,7 +158,6 @@ def profile():
     pwd = None
     if current_user.admin:
         pwd = current_user.password
-
     return jsonify({
         "username": current_user.username,
         "admin": current_user.admin,
