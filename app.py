@@ -155,10 +155,13 @@ def admin():
 @app.route('/profile')
 @login_required
 def profile():
+    pwd = None
+    if current_user.admin:
+        pwd = current_user.password
     return jsonify({
         "username": current_user.username,
         "admin": current_user.admin,
-        "password": None
+        "password": pwd
     })
 
 @app.route('/light', methods=['GET', 'POST'])
