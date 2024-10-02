@@ -217,8 +217,8 @@ def lockstatus():
                 s_ip = data.get('s_ip')
                 lock_entry.s_ip = s_ip
             if data.get('s_status'):
-                s_temperature = data.get('s_status')
-                lock_entry.s_temperature = s_temperature
+                s_status = data.get('s_status')
+                lock_entry.s_status = s_status
             db.session.commit()
             return jsonify({"status": "success"}), 201
         else:
