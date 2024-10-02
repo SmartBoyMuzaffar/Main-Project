@@ -50,6 +50,11 @@ class Temperature(db.Model):
     s_temperature = db.Column(db.String(10), nullable=True)
     s_humidity = db.Column(db.String(10), nullable=True)
 
+class Door(db.Model):
+    s_id = db.Column(db.String(30), primary_key=True)
+    s_ip = db.Column(db.String(30), nullable=True)
+    s_status = db.Column(db.String(10), nullable=True)
+
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
     password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
@@ -194,6 +199,26 @@ def temperature():
                 s_humidity = data.get('s_humidity')
                 temp_entry.s_temperature = s_temperature
                 temp_entry.s_humidity = s_humidity
+            db.session.commit()
+            return jsonify({"status": "success"}), 201
+        else:
+            return jsonify({"status": "failed"}), 404
+    return redirect(url_for('_'))
+
+@app.route('/lockstatus', methods=['GET', 'POST'])
+def lockstatus():
+    if request.method == 'POST':
+        data = request.json
+        s_id = data.get('s_id')
+
+        lock_entry = Door.query.filter_by(s_id=s_id).first()
+        if lock_entry:
+            if data.get('s_ip'):
+                s_ip = data.get('s_ip')
+                lock_entry.s_ip = s_ip
+            if data.get('s_status'):
+                s_temperature = data.get('s_status')
+                lock_entry.s_temperature = s_temperature
             db.session.commit()
             return jsonify({"status": "success"}), 201
         else:
